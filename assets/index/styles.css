@@ -1,0 +1,28 @@
+.index-container {
+  width: 100%;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.hero-container {
+  max-width: 500px;
+  text-align: center;
+  padding: 1rem;
+}
+
+.hero-container > h1,
+.hero-sub-head {
+  text-transform: uppercase;
+}
+
+.hero-container > h1 {
+  font-size: 3rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.hero-sub-head {
+  font-size: 1.2rem;
+}

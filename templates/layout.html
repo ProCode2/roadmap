@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />	
+    <link rel="stylesheet" href="/assets/common/reset.css" />
+    <link rel="stylesheet" href="/assets/common/layout.css" />
+    <link rel="stylesheet" href="/assets/nav/styles.css" />
+    {% block head %}{% endblock %}
+    <title>{% block title %}{% endblock %}</title>
+  </head>
+  <body>
+    <div class="root-container">
+      {%- import "nav.html" as nav -%} {% call nav::navbar() %} {% block content
+      %}{% endblock %}
+    </div>
+  </body>
+</html>

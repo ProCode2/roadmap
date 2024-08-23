@@ -19,10 +19,6 @@ import MapEdge from "./MapEdge";
 import { NodeView, NodeData } from "./Node";
 import { SubmitMap } from "./SubmitMap";
 
-const initialEdges = [
-  { id: "e1-2", source: "1", target: "2", type: "map-edge" },
-];
-
 const edgeTypes = {
   "map-edge": MapEdge,
 };
@@ -56,6 +52,16 @@ export default function App() {
     [setNodes],
   );
 
+  const deleteNode = useCallback(
+    (nodeId: string) => {
+      setNodes((nds) => nds.filter((nd) => nd.id !== nodeId));
+      setEdges((eds) =>
+        eds.filter((ed) => ed.source !== nodeId && ed.target !== nodeId),
+      );
+    },
+    [setNodes, setEdges],
+  );
+
   useEffect(() => {
     const initialNodes: Node<NodeData>[] = [
       {
@@ -72,11 +78,12 @@ export default function App() {
             },
           ],
           setDataChange,
+          deleteNode,
         },
       },
     ];
     setNodes(initialNodes);
-  }, [setNodes, setDataChange]);
+  }, [setNodes, setDataChange, deleteNode]);
   const onConnect = useCallback(
     (params: Connection) => {
       // reset the start node on connections
@@ -125,7 +132,8 @@ export default function App() {
             id,
             heading: "Enter a new heading",
             links: [],
-            setDataChange: setDataChange,
+            setDataChange,
+            deleteNode,
           },
           origin: [0.5, 0.0],
         };
@@ -149,7 +157,7 @@ export default function App() {
         );
       }
     },
-    [screenToFlowPosition, setNodes, setEdges, setDataChange],
+    [screenToFlowPosition, setNodes, setEdges, setDataChange, deleteNode],
   );
 
   return (
