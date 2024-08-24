@@ -1,37 +1,47 @@
-use askama_rocket::Template;
+mod db;
+mod models;
+mod routes;
+
 use dotenvy::dotenv;
 use rocket::fs;
-use sqlx::Row;
-use std::env;
-use std::error::Error;
-
+use std::{env, error::Error};
 #[macro_use]
 extern crate rocket;
 
-#[derive(Template)]
-#[template(path = "index.html")]
-struct IndexTemplate<'a> {
-    name: &'a str,
-}
+use rocket_db_pools::{sqlx, Database};
 
-#[rocket::get("/")]
-fn index() -> IndexTemplate<'static> {
-    IndexTemplate { name: "world" }
-}
+#[derive(Database)]
+#[database("sqlx_pg")]
+struct Db(sqlx::PgPool);
 
 #[rocket::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     dotenv().expect("Failed to load environment variable");
-    let db_url: String = env::var("DB_URL").unwrap();
+    let db_url = env::var("DATABASE_URL").expect("Database url not found");
+    println!("{}", db_url);
+    let figment = rocket::Config::figment().merge((
+        "databases.sqlx_pg",
+        rocket_db_pools::Config {
+            url: db_url,
+            min_connections: None,
+            max_connections: 1024,
+            connect_timeout: 3,
+            idle_timeout: None,
+            extensions: None,
+        },
+    ));
 
-    let con = sqlx::postgres::PgPool::connect(&db_url).await?;
-    let res = sqlx::query("SELECT 1 + 1 as sum").fetch_one(&con).await?;
-    let sum: i32 = res.get("sum");
-
-    println!("1 + 1 = {}", sum);
-    let _rocket = rocket::build()
+    let _rocket = rocket::custom(figment)
+        .attach(Db::init())
         .mount("/assets", fs::FileServer::from("./assets"))
-        .mount("/", routes![index])
+        .mount(
+            "/",
+            routes![
+                routes::map::index,
+                routes::map::explore,
+                routes::map::create_roadmap
+            ],
+        )
         .launch()
         .await?;
     Ok(())
