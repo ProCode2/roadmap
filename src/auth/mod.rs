@@ -1,4 +1,5 @@
 use jsonwebtoken::{decode, DecodingKey, Validation};
+use rocket::http::CookieJar;
 use rocket::http::Status;
 use rocket::request::{FromRequest, Outcome, Request};
 
@@ -13,30 +14,29 @@ impl<'r> FromRequest<'r> for AuthUser {
     type Error = ();
 
     async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
-        // Get the "Authorization" header
-        let auth_header = request.headers().get_one("Authorization");
+        // Access the cookies from the request
+        let cookies: &CookieJar = request.cookies();
 
-        let secret_key = std::env::var("AUTH_SECRET_KEY")
-            .ok()
-            .expect("Can not find auth secret key");
-        if let Some(auth_header) = auth_header {
-            // Check if the header is in the format "Bearer <token>"
-            if auth_header.starts_with("Bearer ") {
-                let token = &auth_header[7..]; // Extract the token
+        // Retrieve the cookie named "auth_cookie"
+        if let Some(cookie) = cookies.get("auth_cookie") {
+            let token = cookie.value();
 
-                // Decode the token
-                let decoded = decode::<Claims>(
-                    token,
-                    &DecodingKey::from_secret(secret_key.as_ref()),
-                    &Validation::default(),
-                );
+            let secret_key = std::env::var("AUTH_SECRET_KEY")
+                .ok()
+                .expect("Cannot find auth secret key");
 
-                // If decoding was successful, return the AuthUser
-                if let Ok(decoded) = decoded {
-                    return Outcome::Success(AuthUser {
-                        id: decoded.claims.sub,
-                    });
-                }
+            // Decode the token
+            let decoded = decode::<Claims>(
+                token,
+                &DecodingKey::from_secret(secret_key.as_ref()),
+                &Validation::default(),
+            );
+
+            // If decoding was successful, return the AuthUser
+            if let Ok(decoded) = decoded {
+                return Outcome::Success(AuthUser {
+                    id: decoded.claims.sub,
+                });
             }
         }
 
@@ -44,3 +44,4 @@ impl<'r> FromRequest<'r> for AuthUser {
         Outcome::Error((Status::Unauthorized, ()))
     }
 }
+

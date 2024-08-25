@@ -1,3 +1,4 @@
+use crate::auth::AuthUser;
 use crate::{models::map::Map, Db};
 use askama_rocket::Template;
 use rocket::serde::json::Json;

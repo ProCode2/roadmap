@@ -1,6 +1,8 @@
-use rocket::http::Status;
+use chrono::Local;
+use rocket::http::{Cookie, CookieJar, Status};
 use rocket::serde::json::Json;
 use rocket::serde::{Deserialize, Serialize};
+use rocket::time::{Duration, OffsetDateTime};
 use rocket_db_pools::Connection;
 
 use crate::jwt::create_jwt;
@@ -17,6 +19,7 @@ pub(crate) struct RegisterData {
 
 #[rocket::post("/register", data = "<register_data>")]
 pub async fn register(
+    cookies: &CookieJar<'_>,
     db: Connection<Db>,
     register_data: Json<RegisterData>,
 ) -> Result<Json<String>, Status> {
@@ -30,6 +33,12 @@ pub async fn register(
     match user_data {
         Ok(user) => {
             let claim_token = create_jwt(user.id).unwrap();
+            let mut cookie = Cookie::new("auth_cookie", claim_token.to_string());
+
+            let now = OffsetDateTime::now_utc() + Duration::days(1);
+            cookie.set_expires(now);
+
+            cookies.add(cookie);
             Ok(Json(claim_token))
         }
         Err(err) => {
@@ -48,6 +57,7 @@ pub(crate) struct LoginData {
 
 #[rocket::post("/login", data = "<login_data>")]
 pub async fn login(
+    cookies: &CookieJar<'_>,
     db: Connection<Db>,
     login_data: Json<LoginData>,
 ) -> Result<Json<String>, Status> {
@@ -56,6 +66,12 @@ pub async fn login(
         Ok(got_user) => match got_user {
             Some(user) => {
                 let claim_token = create_jwt(user.id).unwrap();
+                let mut cookie = Cookie::new("auth_cookie", claim_token.to_string());
+
+                let now = OffsetDateTime::now_utc() + Duration::days(1);
+                cookie.set_expires(now);
+
+                cookies.add(cookie);
                 Ok(Json(claim_token))
             }
             None => {
