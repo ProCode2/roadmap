@@ -1,4 +1,6 @@
+mod auth;
 mod db;
+mod jwt;
 mod models;
 mod routes;
 
@@ -25,7 +27,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             url: db_url,
             min_connections: None,
             max_connections: 1024,
-            connect_timeout: 3,
+            connect_timeout: 10,
             idle_timeout: None,
             extensions: None,
         },
@@ -35,11 +37,16 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .attach(Db::init())
         .mount("/assets", fs::FileServer::from("./assets"))
         .mount(
+            "/auth",
+            routes![routes::user::login, routes::user::register],
+        )
+        .mount(
             "/",
             routes![
                 routes::map::index,
                 routes::map::explore,
-                routes::map::create_roadmap
+                routes::map::create_roadmap,
+                routes::map::edit_roadmap
             ],
         )
         .launch()

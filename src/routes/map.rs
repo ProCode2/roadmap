@@ -3,7 +3,7 @@ use askama_rocket::Template;
 use rocket::serde::json::Json;
 use rocket::serde::{Deserialize, Serialize};
 use rocket_db_pools::Connection;
-use serde_json::{json, Value};
+use serde_json::Value;
 
 #[derive(Template)]
 #[template(path = "index.html")]
@@ -54,5 +54,26 @@ pub async fn create_roadmap(db: Connection<Db>, map_data: Json<CreateMapData>) -
     )
     .await
     .expect("Can not create roadmap at the moment.");
+    Json(map)
+}
+
+#[rocket::put("/roadmaps/<map_id>", format = "json", data = "<new_map>")]
+pub async fn edit_roadmap(
+    db: Connection<Db>,
+    map_id: i32,
+    new_map: Json<CreateMapData>,
+) -> Json<Map> {
+    let map = Map::edit(
+        db,
+        map_id,
+        new_map.title.clone(),
+        new_map.description.clone(),
+        new_map.keywords.clone(),
+        new_map.content.clone(),
+        new_map.sources.clone(),
+        new_map.tags.clone(),
+    )
+    .await
+    .expect("Can not edit roadmap at the moment.");
     Json(map)
 }

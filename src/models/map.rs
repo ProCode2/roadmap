@@ -35,6 +35,66 @@ impl Map {
         Ok(maps)
     }
 
+    pub async fn edit(
+        mut con: Connection<Db>,
+        map_id: i32,
+        title: String,
+        desc: String,
+        keywords: Vec<String>,
+        content: Value,
+        sources: Vec<String>,
+        tags: Vec<String>,
+    ) -> Result<Map, Box<dyn Error>> {
+        // create a new transaction
+        let mut tx = con.begin().await?;
+        // perform all related queries inside tx
+
+        // update map
+        let map: Map = sqlx::query_as("UPDATE map SET title = $1, slug = $2, description = $3, keywords = $4, content = $5, sources = $6 WHERE id = $7 AND user_id = 1 RETURNING *")
+            .bind(&title)
+            .bind(&title.split(" ").collect::<Vec<_>>().join("-")) 
+            .bind(&desc)
+            .bind(&keywords)
+            .bind(&content)
+            .bind(&sources)
+            .bind(&map_id)
+            .fetch_one(&mut *tx).await?;
+
+        // update tags of the map
+        for tag in tags.clone() {
+            // the update on conflict is intentional cause otherwise it won't return
+            // the id
+            let tag_id: (i32,) = sqlx::query_as(
+                "INSERT INTO tag (name) VALUES($1) ON CONFLICT (name) DO UPDATE SET id = tag.id RETURNING id",
+            )
+            .bind(tag)
+            .fetch_one(&mut *tx)
+            .await?;
+
+            // fill map to tag mapper table
+            let _ = sqlx::query(
+                "INSERT INTO map_tag (map_id, tag_id) VALUES($1, $2) ON CONFLICT (map_id, tag_id) DO NOTHING",
+            )
+            .bind(map.id)
+            .bind(tag_id.0)
+            .execute(&mut *tx)
+            .await?;
+
+            // delete tags that don't exist for this map anymore
+            let _ = sqlx::query(
+                "DELETE FROM map_tag WHERE map_id = $1 AND tag_id NOT IN (SELECT id FROM tag WHERE name = ANY($2))",
+            )
+            .bind(map.id)
+            .bind(&tags)
+            .execute(&mut *tx)
+            .await?;
+        }
+
+        // commit the transaction
+        tx.commit().await?;
+        Ok(map)
+    }
+
     pub async fn new(
         mut con: Connection<Db>,
         title: String,
