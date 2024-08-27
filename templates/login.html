@@ -1,0 +1,28 @@
+{% extends "layout.html" %} {% block title %} Explore | RoadMap {% endblock %}
+{% block head %}
+<link rel="stylesheet" href="/assets/login/styles.css" />
+{% endblock %} {% block content %}
+<div class="login-container">
+  <form class="login-box">
+    <label for="email" class="login-input-container">
+      <p class="login-input-label">Email</p>
+      <input
+        name="email"
+        class="login-input-input-box"
+        type="text"
+        placehold="enter your email"
+      />
+    </label>
+    <label for="password" class="login-input-container">
+      <p class="login-input-label">Password</p>
+      <input
+        name="password"
+        class="login-input-input-box"
+        type="text"
+        placehold="Enter your password"
+      />
+    </label>
+    <button class="login-button" type="submit">Login</button>
+  </form>
+</div>
+{% endblock %}

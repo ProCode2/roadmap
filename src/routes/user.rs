@@ -1,3 +1,4 @@
+use askama::Template;
 use chrono::Local;
 use rocket::http::{Cookie, CookieJar, Status};
 use rocket::serde::json::Json;
@@ -53,6 +54,15 @@ pub async fn register(
 pub(crate) struct LoginData {
     email: String,
     password: String,
+}
+
+#[derive(Template)]
+#[template(path = "login.html")]
+pub struct LoginTemplate {}
+
+#[rocket::get("/login")]
+pub fn login_page() -> LoginTemplate {
+    LoginTemplate {}
 }
 
 #[rocket::post("/login", data = "<login_data>")]

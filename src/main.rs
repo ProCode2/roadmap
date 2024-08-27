@@ -38,7 +38,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .mount("/assets", fs::FileServer::from("./assets"))
         .mount(
             "/auth",
-            routes![routes::user::login, routes::user::register],
+            routes![
+                routes::user::login_page,
+                routes::user::login,
+                routes::user::register
+            ],
         )
         .mount(
             "/",
