@@ -1,10 +1,11 @@
 use chrono::serde::ts_seconds;
 use chrono::{DateTime, Utc};
+use rocket::form::validate::Len;
 use rocket::serde::{Deserialize, Serialize};
-use rocket_db_pools::sqlx;
+use rocket_db_pools::sqlx::{self, Acquire, PgConnection};
 use rocket_db_pools::Connection;
 use serde_json::Value;
-use sqlx::Acquire;
+use sqlx::Postgres;
 use std::error::Error;
 
 use crate::Db;
@@ -27,12 +28,44 @@ pub struct Map {
 }
 
 impl Map {
-    pub async fn get_all(mut con: Connection<Db>) -> Result<Vec<Map>, Box<dyn Error>> {
-        let maps: Vec<Map> = sqlx::query_as("SELECT * from Map")
-            .fetch_all(&mut **con)
+    pub async fn get_all(
+        con: &mut Connection<Db>,
+        title: Option<&str>,
+        tags: &Vec<&str>,
+    ) -> Result<Vec<Map>, Box<dyn Error>> {
+        if title.is_some() && title.map(|v| v != "").unwrap() && tags.len() > 0 {
+            println!("Here both");
+            let title = format!("%{}%", title.unwrap());
+            let maps: Vec<Map> = sqlx::query_as("SELECT m.* FROM Map m JOIN map_tag mt ON m.id = mt.map_id JOIN tag t ON t.id = mt.tag_id WHERE t.name = ANY($1) AND m.title ILIKE $2")
+                .bind(&tags)
+                .bind(title)
+                .fetch_all(&mut ***con)
             .await?;
-        println!("{:?}", maps);
-        Ok(maps)
+
+            println!("{:?}", maps);
+            Ok(maps)
+        } else if title.is_some() && title.map(|v| v != "").unwrap() {
+            println!("Here title");
+            let title = format!("%{}%", title.unwrap());
+            let maps: Vec<Map> = sqlx::query_as("SELECT * FROM Map WHERE title ILIKE $1")
+                .bind(title)
+                .fetch_all(&mut ***con)
+                .await?;
+            println!("{:?}", maps);
+            Ok(maps)
+        } else if tags.len() > 0 {
+            println!("Here tags");
+            let maps: Vec<Map> = sqlx::query_as("SELECT m.* FROM Map m JOIN map_tag mt ON m.id = mt.map_id JOIN tag t ON t.id = mt.tag_id WHERE t.name = ANY($1)").bind(&tags).fetch_all(&mut ***con).await?;
+
+            println!("{:?}", maps);
+            Ok(maps)
+        } else {
+            let maps: Vec<Map> = sqlx::query_as("SELECT * from Map")
+                .fetch_all(&mut ***con)
+                .await?;
+            println!("{:?}", maps);
+            Ok(maps)
+        }
     }
 
     pub async fn edit(

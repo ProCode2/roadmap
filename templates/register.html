@@ -1,0 +1,80 @@
+{% extends "layout.html" %} {% block title %} Register | RoadMap {% endblock %}
+{% block head %}
+<link rel="stylesheet" href="/assets/login/styles.css" />
+{% endblock %} {% block content %}
+<script>
+  // register using email and username and password
+  // a token is returned (might remove this as will be using cookies)
+  async function register(event) {
+    event.preventDefault();
+    console.log("registering");
+    const name = document.querySelector("#name").value;
+    const email = document.querySelector("#email").value;
+    const password = document.querySelector("#password").value;
+    const confirm = document.querySelector("#confirm").value;
+    if (password !== confirm) {
+      alert("Passwords don't match");
+      return;
+    }
+    const res = await fetch("/auth/register", {
+      method: "POST",
+      body: JSON.stringify({
+        name,
+        email,
+        password,
+      }),
+    });
+    console.log(res);
+    if (res.status === 200) {
+      window.location.href = "/roadmaps";
+    } else {
+      alert("Failed to register");
+    }
+  }
+</script>
+<div class="login-container">
+  <form class="login-box" onsubmit="register(event)">
+    <label for="email" class="login-input-container">
+      <p class="login-input-label">Full Name</p>
+      <input
+        id="name"
+        name="name"
+        class="login-input-input-box"
+        type="text"
+        placeholder="enter your full name"
+      />
+    </label>
+    <label for="email" class="login-input-container">
+      <p class="login-input-label">Email</p>
+      <input
+        id="email"
+        name="email"
+        class="login-input-input-box"
+        type="text"
+        placeholder="enter your email"
+      />
+    </label>
+    <label for="password" class="login-input-container">
+      <p class="login-input-label">Password</p>
+      <input
+        id="password"
+        name="password"
+        class="login-input-input-box"
+        type="password"
+        placeholder="Enter your password"
+      />
+    </label>
+    <label for="confirm" class="login-input-container">
+      <p class="login-input-label">Confirm Password</p>
+      <input
+        id="confirm"
+        name="confirm"
+        class="login-input-input-box"
+        type="password"
+        placeholder="confirm your new password"
+      />
+    </label>
+    <button class="register-button" type="submit">Register</button>
+  </form>
+</div>
+{% endblock %}

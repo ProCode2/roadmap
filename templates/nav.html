@@ -1,9 +1,15 @@
-{% macro navbar() %}
+{% macro navbar(user) %}
 <nav class="navbar">
   <div class="navbar-container">
     <h1>Roadmap</h1>
     <ul class="navbar-menu">
-      <li><a href="/explore">Explore</a></li>
+      {% if user.id.is_some() %}
+      <li><a href="/auth/logout">Logout</a></li>
+      {% else %}
+      <li><a href="/auth/login">Login</a></li>
+      <li><a href="/auth/register">Register</a></li>
+      {% endif %}
+      <li><a href="/roadmaps">Roadmaps</a></li>
     </ul>
   </div>
 </nav>

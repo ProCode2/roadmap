@@ -11,7 +11,7 @@
   </head>
   <body>
     <div class="root-container">
-      {%- import "nav.html" as nav -%} {% call nav::navbar() %} {% block content
+      {%- import "nav.html" as nav -%} {% call nav::navbar(user) %} {% block content
       %}{% endblock %}
     </div>
   </body>

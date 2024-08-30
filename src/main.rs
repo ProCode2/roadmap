@@ -41,7 +41,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
             routes![
                 routes::user::login_page,
                 routes::user::login,
-                routes::user::register
+                routes::user::register,
+                routes::user::register_page,
+                routes::user::logout,
             ],
         )
         .mount(

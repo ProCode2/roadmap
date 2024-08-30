@@ -1,11 +1,12 @@
 use askama::Template;
-use chrono::Local;
 use rocket::http::{Cookie, CookieJar, Status};
+use rocket::response::Redirect;
 use rocket::serde::json::Json;
 use rocket::serde::{Deserialize, Serialize};
 use rocket::time::{Duration, OffsetDateTime};
 use rocket_db_pools::Connection;
 
+use crate::auth::AuthUser;
 use crate::jwt::create_jwt;
 use crate::models::user::User;
 use crate::Db;
@@ -58,11 +59,28 @@ pub(crate) struct LoginData {
 
 #[derive(Template)]
 #[template(path = "login.html")]
-pub struct LoginTemplate {}
+pub struct LoginTemplate {
+    user: AuthUser,
+}
+
+#[derive(Template)]
+#[template(path = "register.html")]
+pub struct RegisterTemplate {
+    user: AuthUser,
+}
 
 #[rocket::get("/login")]
 pub fn login_page() -> LoginTemplate {
-    LoginTemplate {}
+    LoginTemplate {
+        user: AuthUser { id: None },
+    }
+}
+
+#[rocket::get("/register")]
+pub fn register_page() -> RegisterTemplate {
+    RegisterTemplate {
+        user: AuthUser { id: None },
+    }
 }
 
 #[rocket::post("/login", data = "<login_data>")]
@@ -93,4 +111,10 @@ pub async fn login(
             return Err(Status::Unauthorized);
         }
     }
+}
+
+#[rocket::get("/logout")]
+pub async fn logout(cookies: &CookieJar<'_>) -> Redirect {
+    cookies.remove("auth_cookie");
+    Redirect::to(uri!("/auth/login"))
 }

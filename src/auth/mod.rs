@@ -1,12 +1,10 @@
+use crate::jwt::Claims;
 use jsonwebtoken::{decode, DecodingKey, Validation};
 use rocket::http::CookieJar;
-use rocket::http::Status;
 use rocket::request::{FromRequest, Outcome, Request};
 
-use crate::jwt::Claims;
-
 pub struct AuthUser {
-    pub id: i32,
+    pub id: Option<i32>,
 }
 
 #[rocket::async_trait]
@@ -35,13 +33,12 @@ impl<'r> FromRequest<'r> for AuthUser {
             // If decoding was successful, return the AuthUser
             if let Ok(decoded) = decoded {
                 return Outcome::Success(AuthUser {
-                    id: decoded.claims.sub,
+                    id: Some(decoded.claims.sub),
                 });
             }
         }
 
         // If any step fails, return an Unauthorized status
-        Outcome::Error((Status::Unauthorized, ()))
+        Outcome::Success(AuthUser { id: None })
     }
 }
-

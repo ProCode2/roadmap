@@ -37,7 +37,8 @@
   border-radius: 12px;
 }
 
-.login-button {
+.login-button,
+.register-button {
   padding: 0.7rem 1.3rem;
   background: black;
   color: white;
@@ -47,7 +48,8 @@
   transition: all 350ms ease-in-out;
 }
 
-.login-button:hover {
+.login-button:hover,
+.register-button:hover {
   background: #2d2d2d;
   box-shadow: 0 0 8px 3px lightgray;
   cursor: pointer;

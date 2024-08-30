@@ -1,4 +1,7 @@
+use std::ops::Deref;
+
 use crate::auth::AuthUser;
+use crate::models::tag::Tag;
 use crate::{models::map::Map, Db};
 use askama_rocket::Template;
 use rocket::serde::json::Json;
@@ -8,27 +11,43 @@ use serde_json::Value;
 
 #[derive(Template)]
 #[template(path = "index.html")]
-pub struct IndexTemplate {}
+pub struct IndexTemplate {
+    user: AuthUser,
+}
 
 #[rocket::get("/")]
-pub fn index() -> IndexTemplate {
-    IndexTemplate {}
+pub fn index(user_data: AuthUser) -> IndexTemplate {
+    IndexTemplate { user: user_data }
 }
 
 #[derive(Template)]
 #[template(path = "explore.html")]
 pub struct ExploreTemplate {
     roadmaps: Vec<Map>,
+    user: AuthUser,
+    tags: Vec<Tag>,
 }
 
-#[rocket::get("/roadmaps")]
-pub async fn explore(db: Connection<Db>) -> ExploreTemplate {
-    let roadmaps = Map::get_all(db)
+#[rocket::get("/roadmaps?<title>&<query_tags>")]
+pub async fn explore(
+    user_data: AuthUser,
+    mut db: Connection<Db>,
+    title: Option<&str>,
+    query_tags: Vec<&str>,
+) -> ExploreTemplate {
+    let roadmaps = Map::get_all(&mut db, title, &query_tags)
         .await
-        .expect("Can not get roadmaps at the moment.");
+        .expect("Cannot get roadmaps at the moment.");
 
-    println!("{:?}", roadmaps);
-    ExploreTemplate { roadmaps }
+    let tags = Tag::get_all(&mut db)
+        .await
+        .expect("Cannot get tags at the moment.");
+    println!("{:?}, {:?}", title, query_tags);
+    ExploreTemplate {
+        roadmaps,
+        tags,
+        user: user_data,
+    }
 }
 
 #[derive(Serialize, Deserialize, Default, Debug)]
