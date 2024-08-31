@@ -36,7 +36,7 @@ function NodeLinkItem({
         <input
           type="text"
           placeholder="Material Url"
-          className="p-2"
+          className="p-2 nodrag nopan"
           value={link.url}
           onChange={(e) => setLinkChange({ ...link, url: e.target.value })}
         />
@@ -57,7 +57,7 @@ function NodeLinkItem({
         <div className="mt-2">
           <textarea
             placeholder="Material Description"
-            className="p-2"
+            className="p-2 nodrag nopan"
             value={link.description}
             onChange={(e) =>
               setLinkChange({ ...link, description: e.target.value })
@@ -94,7 +94,7 @@ function NodeContent({ data }: { data: NodeData }) {
         <input
           type="text"
           placeholder="Title of this step"
-          className="p-2"
+          className="p-2 nodrag nopan"
           value={data.heading}
           onChange={(e) =>
             data.setDataChange({ ...data, heading: e.target.value })
@@ -120,6 +120,7 @@ function NodeContent({ data }: { data: NodeData }) {
       <div className="flex flex-col space-y-4">
         {data.links.map((l, idx) => (
           <NodeLinkItem
+            key={l.url}
             link={l}
             setLinkChange={(link) => setLinkChange(link, idx)}
             deleteLink={deleteLink}

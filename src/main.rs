@@ -10,7 +10,40 @@ use std::{env, error::Error};
 #[macro_use]
 extern crate rocket;
 
+use rocket::fairing::{Fairing, Info, Kind};
+use rocket::http::{Header, Method, Status};
+use rocket::{Request, Response};
 use rocket_db_pools::{sqlx, Database};
+
+pub struct CORS;
+
+#[rocket::async_trait]
+impl Fairing for CORS {
+    fn info(&self) -> Info {
+        Info {
+            name: "Add CORS headers to responses",
+            kind: Kind::Response,
+        }
+    }
+
+    async fn on_response<'r>(&self, request: &'r Request<'_>, response: &mut Response<'r>) {
+        if request.method() == Method::Options {
+            response.set_status(Status::NoContent);
+            response.set_header(Header::new(
+                "Access-Control-Allow-Methods",
+                "POST, PATCH, GET, DELETE",
+            ));
+            response.set_header(Header::new(
+                "Access-Control-Allow-Headers",
+                "content-type, authorization",
+            ));
+        }
+        // TODO: THIS SHOULD NOT BE *
+        response.set_header(Header::new("Access-Control-Allow-Origin", "*"));
+        response.set_header(Header::new("Access-Control-Allow-Credentials", "true"));
+        response.set_header(Header::new("Vary", "Origin"));
+    }
+}
 
 #[derive(Database)]
 #[database("sqlx_pg")]
@@ -34,6 +67,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     ));
 
     let _rocket = rocket::custom(figment)
+        .attach(CORS)
         .attach(Db::init())
         .mount("/assets", fs::FileServer::from("./assets"))
         .mount(

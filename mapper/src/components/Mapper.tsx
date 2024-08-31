@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ReactFlow,
   Controls,
@@ -18,6 +18,7 @@ import "reactflow/dist/style.css";
 import MapEdge from "./MapEdge";
 import { NodeView, NodeData } from "./Node";
 import { SubmitMap } from "./SubmitMap";
+import Form from "./Form";
 
 const edgeTypes = {
   "map-edge": MapEdge,
@@ -29,6 +30,7 @@ const nodeTypes = {
 let id = 2;
 const getId = () => `${id++}`;
 export default function App() {
+  const [showForm, setShowForm] = useState(true);
   const connectingNodeId = useRef<string | null>(null);
   const connectionType = useRef<string | null>(null);
   const [nodes, setNodes, onNodesChange] = useNodesState<NodeData>([]);
@@ -162,7 +164,8 @@ export default function App() {
 
   return (
     <>
-      <SubmitMap />
+      {showForm ? <Form open={showForm} setOpen={setShowForm} /> : null}
+      <SubmitMap open={showForm} setOpen={setShowForm} />
       <ReactFlow
         nodes={nodes}
         edges={edges}
