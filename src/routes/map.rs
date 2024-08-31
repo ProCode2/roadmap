@@ -97,3 +97,16 @@ pub async fn edit_roadmap(
     .expect("Can not edit roadmap at the moment.");
     Json(map)
 }
+
+#[derive(Template)]
+#[template(path = "create.html")]
+pub struct CreateTemplate {
+    user: AuthUser,
+}
+
+#[rocket::get("/create")]
+pub async fn create_roadmap_page(user_data: AuthUser) -> CreateTemplate {
+    CreateTemplate {
+        user: user_data
+    }
+}

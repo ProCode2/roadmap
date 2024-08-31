@@ -142,26 +142,24 @@ function NodeHandle({
     />
   );
 }
-export const NodeView = memo(
-  ({ id, data, isConnectable }: NodeProps<NodeData>) => {
-    return (
-      <div className="p-2">
-        <NodeContent data={data} />
-        <NodeHandle
-          type="target"
-          position={Position.Top}
-          style={{ background: "#555" }}
-          onConnect={(params) => console.log("handle onConnect", params)}
-          isConnectable={isConnectable}
-        />
-        <NodeHandle
-          type="source"
-          position={Position.Bottom}
-          id="b"
-          style={{ bottom: 10, top: "auto", background: "#555" }}
-          isConnectable={isConnectable}
-        />
-      </div>
-    );
-  },
-);
+export const NodeView = memo(({ data, isConnectable }: NodeProps<NodeData>) => {
+  return (
+    <div className="p-2">
+      <NodeContent data={data} />
+      <NodeHandle
+        type="target"
+        position={Position.Top}
+        style={{ background: "#555" }}
+        onConnect={(params) => console.log("handle onConnect", params)}
+        isConnectable={isConnectable}
+      />
+      <NodeHandle
+        type="source"
+        position={Position.Bottom}
+        id="b"
+        style={{ bottom: 10, top: "auto", background: "#555" }}
+        isConnectable={isConnectable}
+      />
+    </div>
+  );
+});

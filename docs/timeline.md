@@ -21,3 +21,12 @@
 - |16:00 - 17:00| PUT /map/:mapid/edit - for updating a roadmap
 - |17:00 - 18:00| POST /login
 - |18:00 - 18:40| POST /register
+
+# 31/08/24
+
+- 5. Build map page
+- 1. Integrate create map page
+  - 1. Create form to create a map - title, description, keywords, tags, sources.
+- 2. Integrate edit map page
+- 3. Show tags, username for maps in `/roadmaps` page
+- 4. Show proper time for roadmaps

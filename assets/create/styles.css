@@ -1,0 +1,20 @@
+.root-container {
+  width: 100vw;
+  height: 100vh;
+}
+
+.create-container {
+  width: 100%;
+  height: 100%;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#oot {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  position: relative;
+}

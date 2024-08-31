@@ -52,6 +52,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 routes::map::index,
                 routes::map::explore,
                 routes::map::create_roadmap,
+                routes::map::create_roadmap_page,
                 routes::map::edit_roadmap
             ],
         )
