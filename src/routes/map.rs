@@ -1,6 +1,7 @@
 use std::ops::Deref;
 
 use crate::auth::AuthUser;
+use crate::models::map::MapItem;
 use crate::models::tag::Tag;
 use crate::{models::map::Map, Db};
 use askama_rocket::Template;
@@ -23,7 +24,7 @@ pub fn index(user_data: AuthUser) -> IndexTemplate {
 #[derive(Template)]
 #[template(path = "explore.html")]
 pub struct ExploreTemplate {
-    roadmaps: Vec<Map>,
+    roadmaps: Vec<MapItem>,
     user: AuthUser,
     tags: Vec<Tag>,
 }

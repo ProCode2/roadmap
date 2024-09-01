@@ -108,3 +108,20 @@
   box-shadow: 0 0 8px 3px lightgray;
   cursor: pointer;
 }
+
+.roadmap-tags {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.roadmap-tags span {
+  padding: 0.3rem 0.6rem;
+  font-size: 14px;
+  color: white;
+  background: gray;
+  border-radius: 5px;
+  box-shadow: 0 0 8px 3px lightgray;
+  margin: 0.8rem;
+}

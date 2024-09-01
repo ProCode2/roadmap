@@ -28,9 +28,15 @@
 		{% for map in roadmaps %}
 			<div class="roadmap">
 				<h2 class="roadmap-title">{{map.title}}</h2>	
-				<p class="roadmap-date">{{map.created_at}}</p>
+				<p class="roadmap-date">{{map.created_at.format("%Y-%m-%d %H:%M:%S")}}</p>
+				<p class="roadmap-desc">{{map.user_name}}</p>
+				<p class="roadmap-tags">
+					{% for tag in map.tags %}		
+						<span>{{tag}}</span>
+					{% endfor %}		
+				</p>
 				<p class="roadmap-desc">{{map.description}}</p>
-				<a href="/roadmaps/{{map.id}}" class="roadmap-read-more">Read More</a>
+				<a href="/roadmaps/{{map.slug}}" class="roadmap-read-more">Read More</a>
 			</div>
 		{% endfor %}
 	</div>

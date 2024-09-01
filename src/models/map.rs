@@ -1,14 +1,33 @@
 use chrono::serde::ts_seconds;
 use chrono::{DateTime, Utc};
-use rocket::form::validate::Len;
 use rocket::serde::{Deserialize, Serialize};
-use rocket_db_pools::sqlx::{self, Acquire, PgConnection};
+use rocket_db_pools::sqlx::{self, Acquire};
 use rocket_db_pools::Connection;
 use serde_json::Value;
-use sqlx::Postgres;
 use std::error::Error;
 
 use crate::Db;
+
+#[derive(Serialize, Deserialize, Default, Debug, sqlx::FromRow)]
+#[serde(crate = "rocket::serde")]
+pub struct Author {
+    pub id: i32,
+    pub name: String,
+}
+
+#[derive(Serialize, Deserialize, Default, Debug, sqlx::FromRow)]
+#[serde(crate = "rocket::serde")]
+pub struct MapItem {
+    pub id: i32,
+    pub user_id: i32,
+    pub user_name: String,
+    pub title: String,
+    pub slug: String,
+    pub description: String,
+    pub tags: Vec<String>,
+    #[serde(with = "ts_seconds")]
+    pub created_at: DateTime<Utc>,
+}
 
 #[derive(Serialize, Deserialize, Default, Debug, sqlx::FromRow)]
 #[serde(crate = "rocket::serde")]
@@ -44,11 +63,12 @@ impl Map {
         con: &mut Connection<Db>,
         title: Option<&str>,
         tags: &Vec<&str>,
-    ) -> Result<Vec<Map>, Box<dyn Error>> {
+    ) -> Result<Vec<MapItem>, Box<dyn Error>> {
         if title.is_some() && title.map(|v| v != "").unwrap() && tags.len() > 0 {
             println!("Here both");
             let title = format!("%{}%", title.unwrap());
-            let maps: Vec<Map> = sqlx::query_as("SELECT m.* FROM Map m JOIN map_tag mt ON m.id = mt.map_id JOIN tag t ON t.id = mt.tag_id WHERE t.name = ANY($1) AND m.title ILIKE $2")
+            let maps: Vec<MapItem> = sqlx::query_as("SELECT m.id, m.title, m.slug, m.description, m.created_at, ARRAY_AGG(t.name) AS tags, u.id AS user_id, u.name AS user_name FROM Map m JOIN map_tag mt ON m.id = mt.map_id JOIN tag t ON t.id = mt.tag_id JOIN users u ON m.user_id = u.id WHERE t.name = ANY($1) AND m.title ILIKE $2 GROUP BY 
+        m.id, u.id")
                 .bind(&tags)
                 .bind(title)
                 .fetch_all(&mut ***con)
@@ -59,7 +79,8 @@ impl Map {
         } else if title.is_some() && title.map(|v| v != "").unwrap() {
             println!("Here title");
             let title = format!("%{}%", title.unwrap());
-            let maps: Vec<Map> = sqlx::query_as("SELECT * FROM Map WHERE title ILIKE $1")
+            let maps: Vec<MapItem> = sqlx::query_as("SELECT m.id, m.title, m.slug, m.description, m.created_at, ARRAY_AGG(t.name) AS tags, u.id AS user_id , u.name AS user_name FROM Map m JOIN map_tag mt ON m.id = mt.map_id JOIN tag t ON t.id = mt.tag_id JOIN users u ON m.user_id = u.id WHERE m.title ILIKE $1 GROUP BY 
+        m.id, u.id")
                 .bind(title)
                 .fetch_all(&mut ***con)
                 .await?;
@@ -67,12 +88,14 @@ impl Map {
             Ok(maps)
         } else if tags.len() > 0 {
             println!("Here tags");
-            let maps: Vec<Map> = sqlx::query_as("SELECT m.* FROM Map m JOIN map_tag mt ON m.id = mt.map_id JOIN tag t ON t.id = mt.tag_id WHERE t.name = ANY($1)").bind(&tags).fetch_all(&mut ***con).await?;
+            let maps: Vec<MapItem> = sqlx::query_as("SELECT m.id, m.title, m.slug, m.description, m.created_at, ARRAY_AGG(t.name) AS tags, u.id AS user_id, u.name AS user_name FROM Map m JOIN map_tag mt ON m.id = mt.map_id JOIN tag t ON t.id = mt.tag_id JOIN users u ON m.user_id = u.id WHERE t.name = ANY($1) GROUP BY 
+        m.id, u.id").bind(&tags).fetch_all(&mut ***con).await?;
 
             println!("{:?}", maps);
             Ok(maps)
         } else {
-            let maps: Vec<Map> = sqlx::query_as("SELECT * from Map")
+            let maps: Vec<MapItem> = sqlx::query_as("SELECT m.id, m.title, m.slug, m.description, m.created_at, ARRAY_AGG(t.name) AS tags, u.id AS user_id, u.name AS user_name FROM Map m JOIN map_tag mt ON m.id = mt.map_id JOIN tag t ON t.id = mt.tag_id JOIN users u ON m.user_id = u.id GROUP BY 
+        m.id, u.id")
                 .fetch_all(&mut ***con)
                 .await?;
             println!("{:?}", maps);
