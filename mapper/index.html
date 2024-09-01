@@ -8,7 +8,18 @@
   </head>
   <body>
     <div class="h-screen w-screen">
-      <div id="root" class="w-full h-full"></div>
+      <div id="root" class="w-full h-full" data-edit="true"></div>
+      <script id="json-map" type="json">
+        {
+          "id": 11,
+          "title": "the new map",
+          "description": "description of the map",
+          "keywords": ["some"],
+          "sources": ["some"],
+          "tags": ["test"],
+          "content": "{\"nodes\":[{\"id\":\"1\",\"type\":\"item\",\"position\":{\"x\":3.989487516425756,\"y\":-195.48488830486207},\"data\":{\"id\":\"1\",\"heading\":\"a new heading\",\"links\":[{\"url\":\"github.com\",\"description\":\"Use this mateiral to learn open source\"},{\"url\":\"moregithub.com\",\"description\":\"another link\"}]},\"width\":451,\"height\":328,\"selected\":true,\"positionAbsolute\":{\"x\":3.989487516425756,\"y\":-195.48488830486207},\"dragging\":false},{\"id\":\"3\",\"type\":\"item\",\"position\":{\"x\":-670.8515111695137,\"y\":40.741392904073564},\"data\":{\"id\":\"3\",\"heading\":\"something new\",\"links\":[{\"url\":\"yt.com\",\"description\":\"another link\"}]},\"origin\":[0.5,0],\"width\":451,\"height\":253,\"selected\":false,\"dragging\":false,\"positionAbsolute\":{\"x\":-670.8515111695137,\"y\":40.741392904073564}}],\"edges\":[{\"id\":\"3\",\"type\":\"map-edge\",\"source\":\"1\",\"target\":\"3\"}]}"
+        }
+      </script>
     </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

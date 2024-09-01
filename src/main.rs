@@ -31,7 +31,7 @@ impl Fairing for CORS {
             response.set_status(Status::NoContent);
             response.set_header(Header::new(
                 "Access-Control-Allow-Methods",
-                "POST, PATCH, GET, DELETE",
+                "POST, PUT, GET, DELETE",
             ));
             response.set_header(Header::new(
                 "Access-Control-Allow-Headers",
@@ -87,7 +87,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 routes::map::explore,
                 routes::map::create_roadmap,
                 routes::map::create_roadmap_page,
-                routes::map::edit_roadmap
+                routes::map::edit_roadmap,
+                routes::map::edit_roadmap_page
             ],
         )
         .launch()

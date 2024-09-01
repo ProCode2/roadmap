@@ -28,6 +28,18 @@ pub struct Map {
 }
 
 impl Map {
+    pub async fn get_by_id(
+        mut con: Connection<Db>,
+        map_id: i32,
+        user_id: i32,
+    ) -> Result<Map, Box<dyn Error>> {
+        let map: Map = sqlx::query_as("SELECT * FROM Map WHERE id = $1 AND user_id = $2")
+            .bind(map_id)
+            .bind(user_id)
+            .fetch_one(&mut **con)
+            .await?;
+        Ok(map)
+    }
     pub async fn get_all(
         con: &mut Connection<Db>,
         title: Option<&str>,

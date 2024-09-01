@@ -4,10 +4,14 @@ import Mapper from "./components/Mapper.tsx";
 import "./index.css";
 import { ReactFlowProvider } from "reactflow";
 
-createRoot(document.getElementById("root")!).render(
+const rootElem = document.getElementById("root");
+
+const editMode = rootElem?.getAttribute("data-edit");
+
+createRoot(rootElem!).render(
   <StrictMode>
     <ReactFlowProvider>
-      <Mapper />
+      <Mapper editMode={editMode ? true : false} />
     </ReactFlowProvider>
   </StrictMode>,
 );

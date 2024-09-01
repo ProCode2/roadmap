@@ -120,7 +120,7 @@ function NodeContent({ data }: { data: NodeData }) {
       <div className="flex flex-col space-y-4">
         {data.links.map((l, idx) => (
           <NodeLinkItem
-            key={l.url}
+            key={idx}
             link={l}
             setLinkChange={(link) => setLinkChange(link, idx)}
             deleteLink={deleteLink}

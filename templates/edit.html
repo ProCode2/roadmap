@@ -1,0 +1,19 @@
+{% extends "layout.html" %} {% block title %} Create | RoadMap {% endblock %} {%
+block head %}
+<script type="module" crossorigin src="/assets/create/index-BZ2Hg3lE.js"></script>
+<link rel="stylesheet" crossorigin href="/assets/create/index-DDxszc-I.css">
+<link rel="stylesheet" href="/assets/create/styles.css" />
+{% endblock %} {% block content %}
+<div class="create-container">
+  <div id="root" class="" data-edit="true"></div>
+	{% if let Some(map) = json_map %}
+  		<script id="json-map" type="json">
+    			{{map|safe}}
+  		</script>
+	{% else %}
+  		<script id="json-map" type="json">
+			alert("Roadmap not found")
+  		</script>
+	{% endif %}
+</div>
+{% endblock %}

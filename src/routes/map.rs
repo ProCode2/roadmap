@@ -4,7 +4,7 @@ use crate::auth::AuthUser;
 use crate::models::tag::Tag;
 use crate::{models::map::Map, Db};
 use askama_rocket::Template;
-use rocket::serde::json::Json;
+use rocket::serde::json::{self, Json};
 use rocket::serde::{Deserialize, Serialize};
 use rocket_db_pools::Connection;
 use serde_json::Value;
@@ -77,6 +77,35 @@ pub async fn create_roadmap(db: Connection<Db>, map_data: Json<CreateMapData>) -
     Json(map)
 }
 
+#[derive(Template)]
+#[template(path = "edit.html")]
+pub struct EditTemplate {
+    user: AuthUser,
+    json_map: Option<String>,
+}
+
+#[rocket::get("/roadmaps/<map_id>/edit")]
+pub async fn edit_roadmap_page(
+    db: Connection<Db>,
+    user_data: AuthUser,
+    map_id: i32,
+) -> EditTemplate {
+    let map = Map::get_by_id(db, map_id, user_data.id.unwrap()).await;
+    match map {
+        Ok(map) => {
+            let m = json::to_string(&map).unwrap();
+            EditTemplate {
+                user: AuthUser { id: user_data.id },
+                json_map: Some(m.clone()),
+            }
+        }
+        Err(_) => EditTemplate {
+            user: AuthUser { id: user_data.id },
+            json_map: None,
+        },
+    }
+}
+
 #[rocket::put("/roadmaps/<map_id>", format = "json", data = "<new_map>")]
 pub async fn edit_roadmap(
     db: Connection<Db>,
@@ -106,7 +135,5 @@ pub struct CreateTemplate {
 
 #[rocket::get("/create")]
 pub async fn create_roadmap_page(user_data: AuthUser) -> CreateTemplate {
-    CreateTemplate {
-        user: user_data
-    }
+    CreateTemplate { user: user_data }
 }

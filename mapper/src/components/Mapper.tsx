@@ -29,14 +29,13 @@ const nodeTypes = {
 };
 let id = 2;
 const getId = () => `${id++}`;
-export default function App() {
-  const [showForm, setShowForm] = useState(true);
+export default function App({ editMode }: { editMode: boolean }) {
+  const [showForm, setShowForm] = useState(false);
   const connectingNodeId = useRef<string | null>(null);
   const connectionType = useRef<string | null>(null);
   const [nodes, setNodes, onNodesChange] = useNodesState<NodeData>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const { screenToFlowPosition } = useReactFlow();
-
   const setDataChange = useCallback(
     (newData: NodeData) => {
       setNodes((nodes: Node<NodeData>[]) => {
@@ -65,27 +64,37 @@ export default function App() {
   );
 
   useEffect(() => {
-    const initialNodes: Node<NodeData>[] = [
-      {
-        id: "1",
-        type: "item",
-        position: { x: 0, y: 0 },
-        data: {
+    if (editMode) {
+      const jsonData = JSON.parse(
+        document.getElementById("json-map")?.textContent || "",
+      );
+      const content = JSON.parse(jsonData.content);
+      setNodes(content.nodes);
+      setEdges(content.edges);
+    } else {
+      const initialNodes: Node<NodeData>[] = [
+        {
           id: "1",
-          heading: "Enter a new heading",
-          links: [
-            {
-              url: "github.com",
-              description: "Use this mateiral to learn open source",
-            },
-          ],
-          setDataChange,
-          deleteNode,
+          type: "item",
+          position: { x: 0, y: 0 },
+          data: {
+            id: "1",
+            heading: "Enter a new heading",
+            links: [
+              {
+                url: "github.com",
+                description: "Use this mateiral to learn open source",
+              },
+            ],
+            setDataChange,
+            deleteNode,
+          },
         },
-      },
-    ];
-    setNodes(initialNodes);
-  }, [setNodes, setDataChange, deleteNode]);
+      ];
+
+      setNodes(initialNodes);
+    }
+  }, [setNodes, setDataChange, deleteNode, editMode, setEdges]);
   const onConnect = useCallback(
     (params: Connection) => {
       // reset the start node on connections
@@ -164,7 +173,9 @@ export default function App() {
 
   return (
     <>
-      {showForm ? <Form open={showForm} setOpen={setShowForm} /> : null}
+      {showForm ? (
+        <Form editMode={editMode} open={showForm} setOpen={setShowForm} />
+      ) : null}
       <SubmitMap open={showForm} setOpen={setShowForm} />
       <ReactFlow
         nodes={nodes}

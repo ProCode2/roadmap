@@ -24,9 +24,14 @@
 
 # 31/08/24
 
-- 5. Build map page
 - 1. Integrate create map page
   - 1. Create form t create a map - title, description, keywords, tags, sources.
+  - TODO: FIXES:
+    1.
+
+# 01/09/24
+
 - 2. Integrate edit map page
+- 5. Build map page
 - 3. Show tags, username for maps in `/roadmaps` page
 - 4. Show proper time for roadmaps
