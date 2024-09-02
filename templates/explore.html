@@ -29,7 +29,7 @@
 			<div class="roadmap">
 				<h2 class="roadmap-title">{{map.title}}</h2>	
 				<p class="roadmap-date">{{map.created_at.format("%Y-%m-%d %H:%M:%S")}}</p>
-				<p class="roadmap-desc">{{map.user_name}}</p>
+				<p class="roadmap-desc">@{{map.user_name}}</p>
 				<p class="roadmap-tags">
 					{% for tag in map.tags %}		
 						<span>{{tag}}</span>

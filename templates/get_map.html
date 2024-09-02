@@ -1,0 +1,30 @@
+{% extends "layout.html" %} {% block title %} Focus Mode On | RoadMap {%
+endblock %} {% block head %}
+<link rel="stylesheet" href="/assets/get_map/styles.css" />
+{% endblock %} {% block content %}
+<div class="get-map-container">
+  {% if let Some(m) = map %} {% for tag in m.tags %}
+  <span>{{tag}}</span>
+  {% endfor %} {{m.title}} {{m.description}} {{m.created_at}} {% if let Some(c)
+  = json_content %}
+  <script id="json-map" type="json">
+    {{c|safe}}
+  </script>
+  {% endif %}
+  <div class="map-container" id="map-container">
+    <svg
+      id="edges-container"
+      style="position: absolute; top: 0; left: 0; width: 100%; height: 100%"
+    ></svg>
+  </div>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="/assets/get_map/load_map.js"></script>
+
+  {% else %}
+  <script>
+    alert("Roadmap not found");
+  </script>
+
+  {% endif %}
+</div>
+{% endblock %}

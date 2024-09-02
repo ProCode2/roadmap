@@ -1,4 +1,4 @@
-{% extends "layout.html" %} {% block title %} Create | RoadMap {% endblock %} {%
+{% extends "layout.html" %} {% block title %} Edit | RoadMap {% endblock %} {%
 block head %}
 <script type="module" crossorigin src="/assets/create/index-BZ2Hg3lE.js"></script>
 <link rel="stylesheet" crossorigin href="/assets/create/index-DDxszc-I.css">
@@ -11,7 +11,7 @@ block head %}
     			{{map|safe}}
   		</script>
 	{% else %}
-  		<script id="json-map" type="json">
+  		<script>
 			alert("Roadmap not found")
   		</script>
 	{% endif %}

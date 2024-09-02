@@ -32,6 +32,10 @@
 # 01/09/24
 
 - 2. Integrate edit map page
-- 5. Build map page
 - 3. Show tags, username for maps in `/roadmaps` page
 - 4. Show proper time for roadmaps
+
+# 02/09/24
+
+- 5. Build map page
+- 6. Create a multiselect drop down for the tags in filter options in `/roadmaps`

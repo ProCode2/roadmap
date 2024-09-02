@@ -31,6 +31,21 @@ pub struct MapItem {
 
 #[derive(Serialize, Deserialize, Default, Debug, sqlx::FromRow)]
 #[serde(crate = "rocket::serde")]
+pub struct MapPageData {
+    pub id: i32,
+    pub user_id: i32,
+    pub user_name: String,
+    pub title: String,
+    pub slug: String,
+    pub description: String,
+    pub tags: Vec<String>,
+    pub content: Value,
+    #[serde(with = "ts_seconds")]
+    pub created_at: DateTime<Utc>,
+}
+
+#[derive(Serialize, Deserialize, Default, Debug, sqlx::FromRow)]
+#[serde(crate = "rocket::serde")]
 pub struct Map {
     pub id: i32,
     pub user_id: i32,
@@ -47,14 +62,13 @@ pub struct Map {
 }
 
 impl Map {
-    pub async fn get_by_id(
+    pub async fn get_by_slug(
         mut con: Connection<Db>,
-        map_id: i32,
-        user_id: i32,
-    ) -> Result<Map, Box<dyn Error>> {
-        let map: Map = sqlx::query_as("SELECT * FROM Map WHERE id = $1 AND user_id = $2")
-            .bind(map_id)
-            .bind(user_id)
+        slug: &str,
+    ) -> Result<MapPageData, Box<dyn Error>> {
+        let map: MapPageData = sqlx::query_as("SELECT m.id, m.title, m.slug, m.description, m.content, m.created_at, ARRAY_AGG(t.name) AS tags, u.id AS user_id, u.name AS user_name FROM Map m JOIN map_tag mt ON m.id = mt.map_id JOIN tag t ON t.id = mt.tag_id JOIN users u ON m.user_id = u.id WHERE m.slug = $1 GROUP BY 
+        m.id, u.id")
+            .bind(slug)
             .fetch_one(&mut **con)
             .await?;
         Ok(map)
@@ -105,7 +119,7 @@ impl Map {
 
     pub async fn edit(
         mut con: Connection<Db>,
-        map_id: i32,
+        slug: &str,
         title: String,
         desc: String,
         keywords: Vec<String>,
@@ -118,14 +132,14 @@ impl Map {
         // perform all related queries inside tx
 
         // update map
-        let map: Map = sqlx::query_as("UPDATE map SET title = $1, slug = $2, description = $3, keywords = $4, content = $5, sources = $6 WHERE id = $7 AND user_id = 1 RETURNING *")
+        let map: Map = sqlx::query_as("UPDATE map SET title = $1, slug = $2, description = $3, keywords = $4, content = $5, sources = $6 WHERE slug = $7 AND user_id = 1 RETURNING *")
             .bind(&title)
             .bind(&title.split(" ").collect::<Vec<_>>().join("-")) 
             .bind(&desc)
             .bind(&keywords)
             .bind(&content)
             .bind(&sources)
-            .bind(&map_id)
+            .bind(&slug)
             .fetch_one(&mut *tx).await?;
 
         // update tags of the map

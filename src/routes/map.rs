@@ -1,7 +1,7 @@
 use std::ops::Deref;
 
 use crate::auth::AuthUser;
-use crate::models::map::MapItem;
+use crate::models::map::{MapItem, MapPageData};
 use crate::models::tag::Tag;
 use crate::{models::map::Map, Db};
 use askama_rocket::Template;
@@ -85,19 +85,27 @@ pub struct EditTemplate {
     json_map: Option<String>,
 }
 
-#[rocket::get("/roadmaps/<map_id>/edit")]
+#[rocket::get("/roadmaps/<slug>/edit")]
 pub async fn edit_roadmap_page(
     db: Connection<Db>,
     user_data: AuthUser,
-    map_id: i32,
+    slug: &str,
 ) -> EditTemplate {
-    let map = Map::get_by_id(db, map_id, user_data.id.unwrap()).await;
+    let map = Map::get_by_slug(db, slug).await;
     match map {
         Ok(map) => {
-            let m = json::to_string(&map).unwrap();
-            EditTemplate {
-                user: AuthUser { id: user_data.id },
-                json_map: Some(m.clone()),
+            // if the user owns the map
+            if map.user_id == user_data.id.unwrap() {
+                let m = json::to_string(&map).unwrap();
+                EditTemplate {
+                    user: AuthUser { id: user_data.id },
+                    json_map: Some(m.clone()),
+                }
+            } else {
+                EditTemplate {
+                    user: AuthUser { id: user_data.id },
+                    json_map: None,
+                }
             }
         }
         Err(_) => EditTemplate {
@@ -107,15 +115,46 @@ pub async fn edit_roadmap_page(
     }
 }
 
-#[rocket::put("/roadmaps/<map_id>", format = "json", data = "<new_map>")]
+#[derive(Template)]
+#[template(path = "get_map.html")]
+pub struct GetMapTemplate {
+    user: AuthUser,
+    map: Option<MapPageData>,
+    json_content: Option<String>,
+}
+
+#[rocket::get("/roadmaps/<slug>")]
+pub async fn get_roadmap(db: Connection<Db>, slug: &str, user_data: AuthUser) -> GetMapTemplate {
+    let map = Map::get_by_slug(db, slug).await;
+    match map {
+        Ok(map) => {
+            let m = json::to_string(&map.content).unwrap();
+            GetMapTemplate {
+                user: AuthUser { id: user_data.id },
+                json_content: Some(m.clone()),
+                map: Some(map),
+            }
+        }
+        Err(er) => {
+            println!("{:?}", er);
+            GetMapTemplate {
+                user: AuthUser { id: user_data.id },
+                json_content: None,
+                map: None,
+            }
+        }
+    }
+}
+
+#[rocket::put("/roadmaps/<slug>", format = "json", data = "<new_map>")]
 pub async fn edit_roadmap(
     db: Connection<Db>,
-    map_id: i32,
+    slug: &str,
     new_map: Json<CreateMapData>,
 ) -> Json<Map> {
     let map = Map::edit(
         db,
-        map_id,
+        slug,
         new_map.title.clone(),
         new_map.description.clone(),
         new_map.keywords.clone(),
