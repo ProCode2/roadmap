@@ -94,6 +94,7 @@ pub async fn edit_roadmap_page(
     let map = Map::get_by_slug(db, slug).await;
     match map {
         Ok(map) => {
+            println!("map {:?}", map);
             // if the user owns the map
             if map.user_id == user_data.id.unwrap() {
                 let m = json::to_string(&map).unwrap();

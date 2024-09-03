@@ -35,7 +35,9 @@
 - 3. Show tags, username for maps in `/roadmaps` page
 - 4. Show proper time for roadmaps
 
-# 02/09/24
+# 02/09/24 - 04/09/24
 
 - 5. Build map page
 - 6. Create a multiselect drop down for the tags in filter options in `/roadmaps`
+- 7. Add nanoid to slug
+- 8. Add unique enough Ids for nodes in reactflow (serial ids get conflicted during editing) or set new Ids to start from max pre existing id + 1 to avoid id conflicts
