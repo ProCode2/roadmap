@@ -24,8 +24,11 @@ endblock %} {% block head %}
     {{c|safe}}
   </script>
   {% endif %}
-  <div id="roadmap"></div>
-  <script src="https://d3js.org/d3.v7.min.js"></script>
+<div class="roadmap">
+  <div class="nodes">
+    <canvas id="edges-canvas"></canvas>
+  </div>
+</div>
   <script src="/assets/get_map/load_map.js"></script>
 
   {% else %}
