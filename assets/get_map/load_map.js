@@ -1,16 +1,21 @@
+// get the data emebedded in the html as json script
+// need to parse twice cause the first pass is a JSON string (could be improved)
 const data = JSON.parse(
   JSON.parse(document.querySelector("#json-map").textContent),
 );
-
-const nodesMap = new Map(data.nodes.map((node) => [node.id, node]));
-const root = nodesMap.get("1"); // Assuming '1' is the root node
-
 let numLeafNodes = 0;
-function buildHierarchy(rootId) {
+const nodeSize = 350;
+// max height of the tree
+let maxHeight = 0;
+// this is where nodes are added
+const roadmaps = document.querySelector(".nodes");
+
+// this function recursively creates a tree struture from nodes and edges arrays
+function buildHierarchy(rootId, nodesMap) {
   const rootNode = nodesMap.get(rootId);
   const children = data.edges
     .filter((edge) => edge.source === rootId)
-    .map((edge) => buildHierarchy(edge.target));
+    .map((edge) => buildHierarchy(edge.target, nodesMap));
 
   if (children.length === 0) {
     numLeafNodes++;
@@ -23,35 +28,14 @@ function buildHierarchy(rootId) {
   };
 }
 
-const treeData = buildHierarchy("1");
-const nodeSize = 350;
-
-const totalWidth = numLeafNodes * nodeSize + (numLeafNodes - 1) * 100;
-const mapWindowWidth = totalWidth;
-const mapWindowHeight = totalWidth;
-const canvas = document.getElementById("edges-canvas");
-const ctx = canvas.getContext("2d");
-ctx.fillStyle = "white";
-ctx.fillRect(0, 0, mapWindowWidth, mapWindowHeight);
-
 // Function to get the midpoint of a DOM element by its id
 function getMidPoint(id) {
   const element = document.getElementById(id);
   const rect = element.getBoundingClientRect();
 
   // Get the midpoint relative to the document, not the viewport
-  const roadmaps = document.querySelector(".nodes");
   const canvas = document.querySelector("#edges-canvas");
-  console.log(
-    "canvas",
-    canvas.getBoundingClientRect().top,
-    canvas.getBoundingClientRect().left,
-  );
-  console.log(
-    "roadmaps",
-    roadmaps.getBoundingClientRect().top,
-    roadmaps.getBoundingClientRect().left,
-  );
+  // when user scrolls through the page, the cordinates changes the canvas scrolls are added to adjust for that
   const midX =
     rect.left +
     rect.width / 2 +
@@ -89,6 +73,7 @@ function drawEdges(tree) {
   });
 }
 
+// draw a line from one point to another
 function drawLine(x1, y1, x2, y2) {
   const canvas = document.getElementById("edges-canvas");
   const ctx = canvas.getContext("2d");
@@ -110,8 +95,7 @@ function drawLine(x1, y1, x2, y2) {
   ctx.stroke();
 }
 
-const roadmaps = document.querySelector(".nodes");
-let maxHeight = 0;
+// this function recursively creates the nodes at specific positions int the middle of ws and wr at h height
 function createNode(root, ws, we, h) {
   const nodeElement = document.createElement("div");
   nodeElement.classList.add("node");
@@ -135,13 +119,59 @@ function createNode(root, ws, we, h) {
   });
 }
 
-createNode(treeData, 0, mapWindowWidth, 100);
-let edgeCanvas = document.getElementById("edges-canvas");
-const nodesContainer = document.querySelector(".nodes");
-edgeCanvas.width = Math.max(mapWindowWidth, nodesContainer.offsetWidth);
-edgeCanvas.style.width = Math.max(mapWindowWidth, nodesContainer.offsetWidth);
-edgeCanvas.height = Math.max(maxHeight, nodesContainer.offsetHeight) + 100;
-edgeCanvas.style.height =
-  Math.max(maxHeight, nodesContainer.offsetHeight) + 100 + "px";
+function enableZoom(mapSelector) {
+  const map = document.querySelector(mapSelector);
+  let scale = 1;
+  const minScale = 0.5; // Minimum zoom level (e.g., 50%)
+  const maxScale = 3; // Maximum zoom level (e.g., 300%)
+  const zoomSpeed = 0.1; // Speed of zooming (adjust for sensitivity)
 
-drawEdges(treeData);
+  map.addEventListener("wheel", (event) => {
+    event.preventDefault();
+
+    // Determine scroll direction (positive for zoom out, negative for zoom in)
+    if (event.deltaY < 0) {
+      // Zoom in
+      scale = Math.min(scale + zoomSpeed, maxScale);
+    } else {
+      // Zoom out
+      scale = Math.max(scale - zoomSpeed, minScale);
+    }
+
+    // Apply the scaling transformation
+    map.style.transform = `scale(${scale})`;
+    map.style.transformOrigin = "center"; // Make sure zoom is centered
+  });
+}
+
+// this function sets up the entire map view
+function setup() {
+  // create a map of nodes from the json data for easy access
+  const nodesMap = new Map(data.nodes.map((node) => [node.id, node]));
+
+  const treeData = buildHierarchy("1", nodesMap);
+
+  // total width of the map according to the number of leaf nodes
+  const totalWidth = numLeafNodes * nodeSize + (numLeafNodes - 1) * 100;
+  const mapWindowWidth = totalWidth;
+  const mapWindowHeight = totalWidth;
+  const canvas = document.getElementById("edges-canvas");
+  const ctx = canvas.getContext("2d");
+  ctx.fillStyle = "white";
+  ctx.fillRect(0, 0, mapWindowWidth, mapWindowHeight);
+
+  createNode(treeData, 0, mapWindowWidth, 100);
+  let edgeCanvas = document.getElementById("edges-canvas");
+  const nodesContainer = document.querySelector(".nodes");
+  edgeCanvas.width = Math.max(mapWindowWidth, nodesContainer.offsetWidth);
+  edgeCanvas.style.width = Math.max(mapWindowWidth, nodesContainer.offsetWidth);
+  edgeCanvas.height = Math.max(maxHeight, nodesContainer.offsetHeight) + 100;
+  edgeCanvas.style.height =
+    Math.max(maxHeight, nodesContainer.offsetHeight) + 100 + "px";
+
+  drawEdges(treeData);
+  enableZoom(".nodes");
+}
+
+// do magic
+setup();
