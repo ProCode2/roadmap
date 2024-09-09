@@ -69,6 +69,12 @@ export default function App({ editMode }: { editMode: boolean }) {
         document.getElementById("json-map")?.textContent || "",
       );
       const content = JSON.parse(jsonData.content);
+      // maybe shift to randpm ids instead of serial ids
+      let maxId = id;
+      content.nodes.forEach((n: NodeData) => {
+        maxId = Math.max(maxId, parseInt(n.id));
+      });
+      id = maxId + 1;
       setNodes(content.nodes);
       setEdges(content.edges);
     } else {

@@ -119,7 +119,8 @@ impl Map {
 
     pub async fn edit(
         mut con: Connection<Db>,
-        slug: &str,
+        map_id: i32,
+        user_id: i32,
         title: String,
         desc: String,
         keywords: Vec<String>,
@@ -132,16 +133,18 @@ impl Map {
         // perform all related queries inside tx
 
         // update map
-        let map: Map = sqlx::query_as("UPDATE map SET title = $1, slug = $2, description = $3, keywords = $4, content = $5, sources = $6 WHERE slug = $7 AND user_id = 1 RETURNING *")
+        let map: Map = sqlx::query_as("UPDATE map SET title = $1, slug = $2, description = $3, keywords = $4, content = $5, sources = $6 WHERE id = $7 AND user_id = $8 RETURNING *")
             .bind(&title)
             .bind(&title.split(" ").collect::<Vec<_>>().join("-")) 
             .bind(&desc)
             .bind(&keywords)
             .bind(&content)
             .bind(&sources)
-            .bind(&slug)
+            .bind(&map_id)
+            .bind(&user_id)
             .fetch_one(&mut *tx).await?;
 
+        println!("Here {:?}", map);
         // update tags of the map
         for tag in tags.clone() {
             // the update on conflict is intentional cause otherwise it won't return

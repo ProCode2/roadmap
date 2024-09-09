@@ -125,3 +125,49 @@
   box-shadow: 0 0 8px 3px lightgray;
   margin: 0.8rem;
 }
+
+/* Multiselect dropdows */
+.multiselect-dropdown {
+  position: relative;
+  width: 200px;
+}
+
+.select-box {
+  border: 1px solid #ccc;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.select-box input {
+  width: 100%;
+  border: none;
+  outline: none;
+  cursor: pointer;
+}
+
+.options-container {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  max-height: 200px;
+  border: 1px solid #ccc;
+  background: white;
+  overflow-y: auto;
+  z-index: 10;
+}
+
+.options-container label {
+  display: block;
+  padding: 8px;
+  cursor: pointer;
+}
+
+.options-container label:hover {
+  background-color: #f0f0f0;
+}
+
+.options-container input[type="checkbox"] {
+  margin-right: 10px;
+}

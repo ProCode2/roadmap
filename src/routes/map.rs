@@ -147,15 +147,17 @@ pub async fn get_roadmap(db: Connection<Db>, slug: &str, user_data: AuthUser) ->
     }
 }
 
-#[rocket::put("/roadmaps/<slug>", format = "json", data = "<new_map>")]
+#[rocket::put("/roadmaps/<map_id>", format = "json", data = "<new_map>")]
 pub async fn edit_roadmap(
     db: Connection<Db>,
-    slug: &str,
+    map_id: i32,
+    user_data: AuthUser,
     new_map: Json<CreateMapData>,
 ) -> Json<Map> {
     let map = Map::edit(
         db,
-        slug,
+        map_id,
+        user_data.id.unwrap(),
         new_map.title.clone(),
         new_map.description.clone(),
         new_map.keywords.clone(),

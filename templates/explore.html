@@ -1,6 +1,7 @@
 {% extends "layout.html" %} {% block title %} Explore | RoadMap {% endblock %}
 {% block head %}
 <link rel="stylesheet" href="/assets/explore/styles.css" />
+<script src="/assets/explore/main.js" defer></script>
 {% endblock %} 
 {% block content %}
 <main class="explore-container">
@@ -16,11 +17,19 @@
             </label>
 	    <label for="tags" class="">
 	    	<p class="">Tags</p>
-			<select name="cars" id="cars" multiple>
-				{% for tag in tags %}
-				<option value="{{tag.name}}">{{tag.name}}</option>
-				{% endfor %}
-			</select>
+	<div class="multiselect-dropdown">
+    	<div class="select-box" id="dropdown">
+      	<input type="text" placeholder="Select options" id="selectedOptions" readonly />
+      	<div class="options-container" id="optionsContainer">
+		{% for tag in tags %}
+        	<label>
+	  	<input type="checkbox" name="query_tags" value="{{tag.name}}" />
+		{{tag.name}}
+        	</label>
+		{% endfor %}
+      	</div>
+    	</div>
+  	</div>
             </label>
 	    <button type="submit">Search</button>
 	</form>
