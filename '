@@ -31,6 +31,8 @@ const mapWindowWidth = totalWidth;
 const mapWindowHeight = totalWidth;
 const canvas = document.getElementById("edges-canvas");
 const ctx = canvas.getContext("2d");
+canvas.width = mapWindowWidth;
+canvas.height = mapWindowHeight;
 ctx.fillStyle = "white";
 ctx.fillRect(0, 0, mapWindowWidth, mapWindowHeight);
 
@@ -40,29 +42,23 @@ function getMidPoint(id) {
   const rect = element.getBoundingClientRect();
 
   // Get the midpoint relative to the document, not the viewport
-  const roadmaps = document.querySelector(".nodes");
-  const canvas = document.querySelector("#edges-canvas");
-  console.log(
-    "canvas",
-    canvas.getBoundingClientRect().top,
-    canvas.getBoundingClientRect().left,
-  );
-  console.log(
-    "roadmaps",
-    roadmaps.getBoundingClientRect().top,
-    roadmaps.getBoundingClientRect().left,
-  );
+  const roadmaps = document.querySelector(".roadmap");
   const midX =
     rect.left +
     rect.width / 2 +
-    canvas.scrollLeft -
-    canvas.getBoundingClientRect().left;
+    roadmaps.scrollLeft -
+    roadmaps.getBoundingClientRect().left;
   const midY =
     rect.top +
     rect.height / 2 +
-    canvas.scrollTop -
-    canvas.getBoundingClientRect().top;
+    roadmaps.scrollTop -
+    roadmaps.getBoundingClientRect().top;
   return { x: midX, y: midY };
+}
+
+// Function to clear the canvas
+function clearCanvas() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
 // Recursive function to draw edges from parent to children
@@ -136,12 +132,7 @@ function createNode(root, ws, we, h) {
 }
 
 createNode(treeData, 0, mapWindowWidth, 100);
-let edgeCanvas = document.getElementById("edges-canvas");
-const nodesContainer = document.querySelector(".nodes");
-edgeCanvas.width = Math.max(mapWindowWidth, nodesContainer.offsetWidth);
-edgeCanvas.style.width = Math.max(mapWindowWidth, nodesContainer.offsetWidth);
-edgeCanvas.height = Math.max(maxHeight, nodesContainer.offsetHeight) + 100;
-edgeCanvas.style.height =
-  Math.max(maxHeight, nodesContainer.offsetHeight) + 100 + "px";
+document.getElementById("edges-canvas").height = maxHeight + 100;
+document.getElementById("edges-canvas").style.height = maxHeight + 100 + "px";
 
 drawEdges(treeData);

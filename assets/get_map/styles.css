@@ -88,10 +88,8 @@
   overflow: auto;
 }
 
-#edge-canvas {
-  postion: absolute;
-  left: 0;
-  top: 0;
+#edges-canvas {
+  max-width: none;
 }
 
 .node {
@@ -99,4 +97,23 @@
   border: 1px dashed black;
   position: absolute;
   background: white;
+  display: flex;
+  flex-direction: column;
+}
+
+.node-links {
+  border: 1px solid gray;
+  border-radius: 5px;
+  margin: 0.5rem;
+  padding: 0.5rem;
+}
+
+.node-links a {
+  color: black;
+}
+
+.node-links p {
+  font-size: 14px;
+  color: gray;
+  margin-top: 10px;
 }
